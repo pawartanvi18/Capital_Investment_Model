@@ -1,15 +1,27 @@
 import streamlit as st
 
-def load_custom_ui():
-    """Load enhanced custom CSS with improved styling, animations, and user experience."""
-    
+
+def load_custom_ui(theme: str = "auto", title: str = "Investment Decision Predictor"):
+    """Load enhanced custom CSS with improved styling, animations, and user experience.
+
+    Parameters
+    - theme: 'auto' | 'light' | 'dark'  -> chooses which CSS variable set to inject
+    - title: header title to display on the page
+    """
+
     # --- Custom CSS Styling ---
+    # We keep two flavours of variables and choose based on `theme` parameter.
+    # 'auto' will still include prefers-color-scheme fallback so user's OS/theme works.
+    if theme not in ("auto", "light", "dark"):
+        theme = "auto"
+
     st.markdown("""
     <style>
         /* Import Google Fonts */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
         
         /* === Elegant Versatile Color Palette === */
+        /* Default/light theme variables (we may override via separate block for dark) */
         :root {
             --bg-primary: #f8f9fa;
             --bg-secondary: #ffffff;
@@ -36,7 +48,33 @@ def load_custom_ui():
             --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
 
-        /* Dark theme colors */
+        /* Explicit dark theme variables (used when theme == 'dark' or OS prefers dark in 'auto') */
+        .theme-dark {
+            --bg-primary: #1e1e1e;
+            --bg-secondary: #2d2d2d;
+            --bg-gradient-start: #252525;
+            --bg-gradient-end: #1e1e1e;
+            --sidebar-gradient-start: #2d2d2d;
+            --sidebar-gradient-end: #252525;
+            --result-box-gradient-start: #2d2d2d;
+            --result-box-gradient-end: #363636;
+            --text-primary: #e8eaed;
+            --text-secondary: #9aa0a6;
+            --text-sidebar: #dadce0;
+            --text-positive: #34a853;
+            --text-negative: #f28b82;
+            --text-warning: #fbbc04;
+            --border-color: #3c4043;
+            --button-gradient-start: #8ab4f8;
+            --button-gradient-end: #669df6;
+            --button-hover-start: #aecbfa;
+            --button-hover-end: #8ab4f8;
+            --card-accent: #8ab4f8;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --shadow-hover-color: rgba(0, 0, 0, 0.6);
+        }
+
+        /* Auto fallback for OS theme preference (only used when theme == 'auto') */
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg-primary: #1e1e1e;
@@ -112,6 +150,90 @@ def load_custom_ui():
             animation: fadeIn 0.6s ease;
             position: relative;
             overflow: hidden;
+        }
+
+        /* === Role Selection Section === */
+        .section-header {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        /* === Header and Role Selection Section === */
+        .header-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .role-selection-card {
+            background: var(--bg-secondary);
+            border-radius: 1rem;
+            box-shadow: 0 4px 12px var(--shadow-color);
+            padding: 2rem;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .role-selection-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--card-accent), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        .role-selection-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .role-selection-header h2 {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 1.8rem;
+        }
+
+        .role-selection-header p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Simple button styling for role selection */
+        div[data-testid="stHorizontalBlock"] > div {
+            padding: 0.5rem;
+        }
+
+        button[kind="primary"] {
+            background: var(--bg-primary) !important;
+            color: var(--text-primary) !important;
+            border: 2px solid var(--border-color) !important;
+            border-radius: 0.75rem !important;
+            padding: 1.5rem !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+            height: auto !important;
+            min-height: 100px !important;
+        }
+
+        button[kind="primary"]:hover {
+            border-color: var(--card-accent) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 16px var(--shadow-hover-color) !important;
         }
 
         .result-box::before {
@@ -468,8 +590,32 @@ def load_custom_ui():
     </style>
     """, unsafe_allow_html=True)
 
+    # --- Theme toggle script: explicitly apply dark class when requested ---
+    if theme == "dark":
+        st.markdown(
+            """
+            <script>
+            (function(){
+                try{document.documentElement.classList.add('theme-dark');}catch(e){}
+            })();
+            </script>
+            """,
+            unsafe_allow_html=True,
+        )
+    elif theme == "light":
+        st.markdown(
+            """
+            <script>
+            (function(){
+                try{document.documentElement.classList.remove('theme-dark');}catch(e){}
+            })();
+            </script>
+            """,
+            unsafe_allow_html=True,
+        )
+
     # --- Page Header ---
-    st.markdown('<h1 class="main-header">💰 Investment Decision Predictor</h1>', unsafe_allow_html=True)
+    st.markdown(f'<h1 class="main-header">💰 {title}</h1>', unsafe_allow_html=True)
     st.markdown("""
     This application uses **machine learning** to predict cash flows and guide investment decisions.  
     Enter your project parameters in the sidebar to get a detailed financial and risk analysis.
