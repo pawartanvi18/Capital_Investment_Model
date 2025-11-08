@@ -527,7 +527,7 @@ col1, col2, col3 = st.columns(3)
 
 with col1:
     initial_cost = st.number_input(
-        "Initial Cost ($)", 
+        "Initial Cost (₹)", 
         min_value=-1000000, 
         max_value=0, 
         value=-100000, 
